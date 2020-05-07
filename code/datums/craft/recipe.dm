@@ -9,6 +9,10 @@
 	var/time = 30 //Used when no specific time is set
 	var/related_stats = list(STAT_COG)	// used to decrease crafting time for non tool steps
 	var/avaliableToEveryone = TRUE
+	var/dir_type = 0  // spawn the result in the user's direction by default
+	// set it to 1 to spawn the result towards the user
+	// set it to 2 to spawn the result in its default direction (stored in dir_default)
+	var/dir_default = 2  // south is default for recipes with dir_type = 2
 
 /datum/craft_recipe/New()
 	var/step_definations = steps
@@ -22,7 +26,13 @@
 /datum/craft_recipe/proc/spawn_result(obj/item/craft/C, mob/living/user)
 	var/atom/movable/M = new result(get_turf(C))
 	M.Created(user)
-	M.dir = user.dir
+	switch (C.recipe.dir_type)
+		if (0)  // spawn the result in the user's direction
+			M.dir = user.dir
+		if (1)  // spawn the result towards the user
+			M.dir = reverse_dir[user.dir]
+		else  // spawn the result in its default direction
+			M.dir = C.recipe.dir_default
 	var/slot = user.get_inventory_slot(C)
 	qdel(C)
 	if(! (flags & CRAFT_ON_FLOOR) && (slot in list(slot_r_hand, slot_l_hand)))
